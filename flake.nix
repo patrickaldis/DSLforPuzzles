@@ -20,13 +20,17 @@
               final.haskell-nix.hix.project {
                 src = ./.;
                 # uncomment with your current system for `nix flake show` to work:
-                #evalSystem = "x86_64-linux";
+                evalSystem = "x86_64-linux";
+                # modules = [pkgs.z3];
               };
           })
         ];
         pkgs = import nixpkgs { inherit system overlays; inherit (haskellNix) config; };
-        flake = pkgs.hixProject.flake {};
+        flake = pkgs.hixProject.flake {
+          # buildInputs = [pkgs.z3];
+        };
       in flake // {
+        packages.default = flake.packages."DSLTest:exe:DSLTest";
         legacyPackages = pkgs;
       });
 

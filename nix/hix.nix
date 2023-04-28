@@ -9,6 +9,7 @@
   # ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
   #   p.musl64
   # ]);
+  shell.buildInputs = [pkgs.z3];
 
   # Tools to include in the development shell
   shell.tools.cabal = "latest";

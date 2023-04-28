@@ -1,24 +1,29 @@
 {-# OPTIONS_GHC -Wall #-}
 module Main where
+import Data.SBV
+import Control.Monad (foldM)
+import Spec
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = do
+  r <- allSat problem
+  print r
 
-data Toy b next
-  = Output b next
-  | Bell next
-  | Done
-data Boy b
-  = Output' b (Boy b)
-  | Bell' (Boy b)
-  | Done'
+problem :: Predicate
+problem = do x <- free "x" :: Symbolic SInteger
+             y <- free "y" :: Symbolic SInteger
+             constrain $ x .>= 0 :: Symbolic ()
+             constrain $ y .>= 0 :: Symbolic ()
+             return $ x + y .== 3 :: Symbolic SBool
 
-data Cheat f = Cheat (f (Cheat f))
-data MyList a = Nil | Cons a (MyList a)
-
-exp1 :: Toy String (Toy b next)
-exp1 = Output "a" Done
-
-exp2 :: Toy b1 (Toy String (Toy b2 next))
-exp2 = Bell (Output "A" Done)
-
+-- convert :: Constraint -> Predicate
+-- convert (ForAll f) = do
+--   x <- free "a" :: Symbolic SInteger
+--   let cs = f x :: [Constraint]
+--       -- res :: SBV Bool
+--   -- foldM :: ( b -> a -> m b)
+--   --       :: b
+--   --       :: t a   [Constraint]
+--   --       :: m b
+--   foldM (\s c -> s .&& convert c) (True :: SBV Bool) cs
+--
