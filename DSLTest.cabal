@@ -26,7 +26,7 @@ executable DSLTest
     build-depends:    base,
                       sbv,
                       DSLTest
-    other-modules:    Spec
+    -- other-modules:    Spec
     -- build-tool-depends: z3:z3 <=1.0.0
     -- extra-libraries:  z3
     -- extra-libraries-static: z3
