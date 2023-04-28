@@ -1,4 +1,4 @@
-module Spec where
+module Lib where
 import Data.SBV
 
 type Symbol = Int
@@ -14,7 +14,6 @@ type Symbol = Int
 data Constraint
   = ForAll (SBV Integer -> [Constraint])
   | Exp SBool
-
 example :: Constraint
 example =
   ForAll

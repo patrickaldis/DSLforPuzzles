@@ -24,7 +24,8 @@ executable DSLTest
     import:           warnings
     main-is:          Main.hs
     build-depends:    base,
-                      sbv
+                      sbv,
+                      DSLTest
     other-modules:    Spec
     -- build-tool-depends: z3:z3 <=1.0.0
     -- extra-libraries:  z3
