@@ -1,16 +1,9 @@
 module Spec where
+
 import Data.SBV
 
 type Symbol = Int
 
--- data SBool
---   = And SBool SBool
---   | Or SBool SBool
---   | Not SBool
---   | GT Symbol Symbol
---   | EQ Symbol Symbol
---   | Lit Bool
---
 data Constraint
   = ForAll (SBV Integer -> [Constraint])
   | Exp SBool
@@ -19,13 +12,23 @@ example :: Constraint
 example =
   ForAll
     ( \x ->
-        [
-          ForAll
+        [ Exp $ x .> 1,
+          Exp $ x .< 3
+        ]
+    )
+
+example1 :: Constraint
+example1 =
+  ForAll
+    ( \x ->
+        [ ForAll
             ( \y ->
-                [
+                [ 
+                Exp $ x .< 11,
+                  Exp $ x .> 4,
                   Exp $ x .> y,
-                  Exp $ x .> 8,
-                  Exp $ y .== 7
+                  Exp $ y .< 8,
+                  Exp $ y .> 4
                 ]
             )
         ]

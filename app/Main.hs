@@ -1,29 +1,51 @@
 {-# OPTIONS_GHC -Wall #-}
+
 module Main where
-import Data.SBV
+
 import Control.Monad (foldM)
+import Data.SBV
+import Reader (convert)
 import Spec
 
 main :: IO ()
 main = do
-  r <- allSat problem
+  let p = convert problem
+  putStrLn "Single Solve:"
+  r <- sat p
   print r
+  putStrLn "All Solve"
+  r' <- allSat p
+  print "Solved"
+  print r'
 
-problem :: Predicate
-problem = do x <- free "x" :: Symbolic SInteger
-             y <- free "y" :: Symbolic SInteger
-             constrain $ x .>= 0 :: Symbolic ()
-             constrain $ y .>= 0 :: Symbolic ()
-             return $ x + y .== 3 :: Symbolic SBool
+problem :: Constraint
+problem =
+  ForAll
+    ( \x ->
+        [ Exp $ x .> 0,
+          Exp $ x .<= 9,
+          ForAll
+            ( \y ->
+                [ Exp $ y .> 0,
+                  Exp $ y .<= 9,
+                  Exp $ x + y .== 7
+                ]
+            )
+        ]
+    )
 
--- convert :: Constraint -> Predicate
--- convert (ForAll f) = do
---   x <- free "a" :: Symbolic SInteger
---   let cs = f x :: [Constraint]
---       -- res :: SBV Bool
---   -- foldM :: ( b -> a -> m b)
---   --       :: b
---   --       :: t a   [Constraint]
---   --       :: m b
---   foldM (\s c -> s .&& convert c) (True :: SBV Bool) cs
---
+problem2 :: Constraint
+problem2 =
+  ForAll
+    ( \x ->
+        [ Exp $ x .>= 0,
+          Exp $ x .<= 4,
+          ForAll
+            ( \y ->
+                [ Exp $ y .>= 0,
+                  Exp $ y .<= 4,
+                  Exp $ (y .^ (2 :: SInteger) - (x .^ (3 :: SInteger) + x + 1)) `sMod` 5 .== 0
+                ]
+            )
+        ]
+    )

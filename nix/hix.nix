@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  # name = "project-name";
+  # name = "diss";
   compiler-nix-name = "ghc927"; # Version of GHC to use
 
   # Cross compilation support:
@@ -9,6 +9,7 @@
   # ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
   #   p.musl64
   # ]);
+  shell.name = "diss";
   shell.buildInputs = [pkgs.z3];
 
   # Tools to include in the development shell
