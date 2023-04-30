@@ -14,6 +14,8 @@ data Cell a = Cell
     value :: a
   }
 
+type Board a = [[Maybe (Cell a)]]
+
 example :: Constraint
 example =
   ForAll
