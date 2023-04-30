@@ -8,6 +8,12 @@ data Constraint
   = ForAll (SBV Integer -> [Constraint])
   | Exp SBool
 
+data Cell a = Cell
+  { x :: Int,
+    y :: Int,
+    value :: a
+  }
+
 example :: Constraint
 example =
   ForAll
@@ -23,8 +29,7 @@ example1 =
     ( \x ->
         [ ForAll
             ( \y ->
-                [ 
-                Exp $ x .< 11,
+                [ Exp $ x .< 11,
                   Exp $ x .> 4,
                   Exp $ x .> y,
                   Exp $ y .< 8,
