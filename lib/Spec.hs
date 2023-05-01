@@ -2,19 +2,11 @@ module Spec where
 
 import Data.SBV
 
-type Symbol = Int
+type Symbol = SInteger
 
 data Constraint
   = ForAll (SBV Integer -> [Constraint])
   | Exp SBool
-
-data Cell a = Cell
-  { x :: Int,
-    y :: Int,
-    value :: a
-  }
-
-type Board a = [[Maybe (Cell a)]]
 
 example :: Constraint
 example =
