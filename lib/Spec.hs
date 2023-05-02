@@ -5,11 +5,11 @@ import Data.SBV
 type Symbol = SInteger
 
 data Constraint
-  = ForAll (SBV Integer -> [Constraint])
+  = ForAll (Symbol -> [Constraint])
   | Exp SBool
 
-example :: Constraint
-example =
+example2 :: Constraint
+example2 =
   ForAll
     ( \x ->
         [ Exp $ x .> 1,
@@ -17,17 +17,15 @@ example =
         ]
     )
 
-example1 :: Constraint
-example1 =
+example :: Constraint
+example =
   ForAll
     ( \x ->
-        [ ForAll
+        [ Exp $ (x .> 4) .&& (x .< 11),
+          ForAll
             ( \y ->
-                [ Exp $ x .< 11,
-                  Exp $ x .> 4,
-                  Exp $ x .> y,
-                  Exp $ y .< 8,
-                  Exp $ y .> 4
+                [ Exp $ (y .> 4) .&& (y .< 8),
+                  Exp $ x .> y
                 ]
             )
         ]
