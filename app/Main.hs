@@ -2,50 +2,38 @@
 
 module Main where
 
-import Control.Monad (foldM)
-import Data.SBV
-import Reader (convert)
-import Spec
+import Control.Monad
+import Control.Monad.Trans.List
+import Data.List (intersperse)
+import Data.SBV hiding (name)
+import Reader2
+import Spec2
 
 main :: IO ()
-main = do
-  let p = convert problem
-  putStrLn "Single Solve:"
-  r <- sat p
-  print r
-  putStrLn "All Solve"
-  r' <- allSat p
-  print "Solved"
-  print r'
+main = solveAll testInstance >>= printSols (Just testInstance)
 
-problem :: Constraint
-problem =
-  ForAll
-    ( \x ->
-        [ Exp $ x .> 0,
-          Exp $ x .<= 9,
-          ForAll
-            ( \y ->
-                [ Exp $ y .> 0,
-                  Exp $ y .<= 9,
-                  Exp $ x + y .== 7
-                ]
-            )
-        ]
-    )
+testProblem :: Problem
+testProblem =
+  Problem
+    { name = "Test Problem 1",
+      structure =
+        let t1 =
+              CellType
+                { cellName = "Test Type 1",
+                  noValues = 3
+                }
+         in [ [t1, t1, t1],
+              [t1, t1, t1]
+            ],
+      constraints = []
+    }
 
-problem2 :: Constraint
-problem2 =
-  ForAll
-    ( \x ->
-        [ Exp $ x .>= 0,
-          Exp $ x .<= 4,
-          ForAll
-            ( \y ->
-                [ Exp $ y .>= 0,
-                  Exp $ y .<= 4,
-                  Exp $ (y .^ (2 :: SInteger) - (x .^ (3 :: SInteger) + x + 1)) `sMod` 5 .== 0
-                ]
-            )
+testInstance :: PuzzleInstance
+testInstance =
+  PuzzleInstance
+    { problem = testProblem,
+      state =
+        [ [Nothing, Just 1, Just 3],
+          [Just 2, Just 1, Just 1]
         ]
-    )
+    }
