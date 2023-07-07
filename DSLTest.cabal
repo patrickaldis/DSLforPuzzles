@@ -21,7 +21,12 @@ library
                       transformers
 
     default-language: Haskell2010
-    exposed-modules:  Spec, Spec2, Reader, Reader2
+    exposed-modules:  Spec,
+                      Spec2,
+                      Reader,
+                      Reader2,
+                      DSL
+
 
 executable DSLTest
     import:           warnings

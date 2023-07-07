@@ -11,13 +11,22 @@ data CellType = CellType -- {{{
     noValues :: Word8
   }
 
+data CellVar = CellVar
+  { cellType :: CellType,
+    value :: SWord8,
+    col :: Word8,
+    row :: Word8
+  }
+
+type SBoard = [[CellVar]]
+
 -- | A 2D array that identifies what cell is which type
 type PuzzleStructure = [[CellType]] -- }}}
 
 -- Puzzle Rules Type:
 -- A type to define restrictions on the contents of the cells
 data Constraint -- {{{
-  = ForAll CellType (SBV Integer -> [Constraint])
+  = ForAll CellType (CellVar -> [Constraint])
   | Exp SBool
 
 -- | A description of the layout and rules of a puzzle.
@@ -39,6 +48,11 @@ data PuzzleInstance = PuzzleInstance
     state :: PuzzleState
   } -- }}}
 
+{-
+
+>>> 1 + 2
+
+-}
 -- data Cell a = Cell
 --   { x :: Int,
 --     y :: Int,
