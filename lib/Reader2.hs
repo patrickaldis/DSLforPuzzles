@@ -131,7 +131,7 @@ applyConstraints ::
   SBoard ->
   Symbolic SBool
 applyConstraints cs cellTypes bList board =
-  sOr
+  sAnd
     <$> mapM
       (\c -> applyConstraint c cellTypes bList board)
       cs
@@ -139,9 +139,9 @@ applyConstraints cs cellTypes bList board =
     applyConstraint :: Constraint -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
     applyConstraint (ForAll xType fExpr) ts bList board =
       let xs = do
-            row <- zip2d board ts
-            (x, t) <- row
-            if cellName t == cellName xType
+            xs' <- zip2d board ts
+            (x, t) <- xs'
+            if cellName t == cellName xType && (not . elem (row x, col x) $ bList)
               then [x]
               else []
 
