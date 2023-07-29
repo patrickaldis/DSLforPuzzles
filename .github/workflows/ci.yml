@@ -17,4 +17,6 @@ jobs:
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         # If you chose API tokens for write access OR if you have a private cache
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix build --accept-flake-config
+    - run: |
+        nix build --accept-flake-config
+        nix run --accept-flake-config

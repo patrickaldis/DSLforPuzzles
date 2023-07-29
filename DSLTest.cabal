@@ -27,6 +27,7 @@ library
                       Reader2,
                       DSL
 
+    extra-libaries: z3
 
 executable DSLTest
     import:           warnings
@@ -36,10 +37,6 @@ executable DSLTest
                       transformers,
                       DSLTest
 
-    -- other-modules:    Spec
-    -- build-tool-depends: z3:z3 <=1.0.0
-    -- extra-libraries:  z3
-    -- extra-libraries-static: z3
-    -- pkgconfig-depends: z3
+    extra-libraries:  z3
     hs-source-dirs:   app
     default-language: Haskell2010

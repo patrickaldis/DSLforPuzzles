@@ -19,19 +19,20 @@
             hixProject =
               final.haskell-nix.hix.project {
                 src = ./.;
-                # uncomment with your current system for `nix flake show` to work:
                 evalSystem = "x86_64-linux";
-                # modules = [pkgs.z3];
               };
           })
         ];
         pkgs = import nixpkgs { inherit system overlays; inherit (haskellNix) config; };
-        flake = pkgs.hixProject.flake {
-          # buildInputs = [pkgs.z3];
-        };
+        flake = pkgs.hixProject.flake { };
+        withz3 = outname: pname: 
+           pkgs.runCommandNoCC outname { buildInputs = [ pkgs.z3 pkgs.makeWrapper]; } ''
+              mkdir -p $out/bin
+              makeWrapper ${flake.packages.${pname}}/bin/${outname} $out/bin/${outname} \
+                --set SBV_Z3 ${pkgs.z3}/bin/z3
+            '';
       in flake // {
-        packages.default = flake.packages."DSLTest:exe:DSLTest";
-        legacyPackages = pkgs;
+      packages.default = withz3 "DSLTest" "DSLTest:exe:DSLTest";
       });
 
   # --- Flake Local Nix Configuration ----------------------------
