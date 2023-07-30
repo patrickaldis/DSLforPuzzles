@@ -4,6 +4,7 @@ module Main where
 
 import DSL
 import Data.Word (Word8)
+import Prelude hiding (div)
 
 main :: IO ()
 main = solveAll testInstance >>= printSols (Just testInstance)
@@ -29,7 +30,7 @@ testProblem =
                               Exp $ (row x .== row y) .=> (value x ./= value y),
                               Exp $ (col x .== col y) .=> (value x ./= value y),
                               Exp $
-                                ((col x `sDiv` 3 .== col y `sDiv` 3) .&& (row x `sDiv` 3 .== row y `sDiv` 3))
+                                ((col x `div` 3 .== col y `div` 3) .&& (row x `div` 3 .== row y `div` 3))
                                   .=> (value x ./= value y)
                             ]
                         )
