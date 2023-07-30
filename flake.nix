@@ -31,8 +31,10 @@
               makeWrapper ${flake.packages.${pname}}/bin/${outname} $out/bin/${outname} \
                 --set SBV_Z3 ${pkgs.z3}/bin/z3
             '';
-      in flake // {
-      packages.default = withz3 "DSLTest" "DSLTest:exe:DSLTest";
+      in flake // rec {
+      packages.default = packages.testing;
+      packages.exe = withz3 "DSLTest" "DSLTest:exe:DSLTest";
+      packages.testing = withz3 "testing" "DSLTest:test:testing";
       });
 
   # --- Flake Local Nix Configuration ----------------------------
