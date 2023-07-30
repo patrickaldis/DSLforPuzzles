@@ -3,9 +3,7 @@
 module Main where
 
 import DSL
-import Data.SBV hiding (name)
-import Reader2
-import Spec2 hiding (col, row)
+import Data.Word (Word8)
 
 main :: IO ()
 main = solveAll testInstance >>= printSols (Just testInstance)

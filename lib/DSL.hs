@@ -1,10 +1,24 @@
-module DSL where
+module DSL
+  ( col,
+    row,
+    Constraint (..),
+    Problem (..),
+    CellType (..),
+    PuzzleInstance (..),
+
+    solveAll,
+    printSols,
+  )
+where
 
 import Data.SBV
-import Spec2
+import Spec hiding (col, row)
+import qualified Spec
+
+import Solve
 
 col :: CellVar -> SWord8
-col = literal . Spec2.col
+col = literal . Spec.col
 
 row :: CellVar -> SWord8
-row = literal . Spec2.row
+row = literal . Spec.row

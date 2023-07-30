@@ -1,13 +1,13 @@
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
-module Reader2 (varNames, asPredicate, solveAll, printSols) where
+module Solve (asPredicate, solveAll, printSols) where
 
 import Control.Monad (forM, forM_)
 import Data.Map.Strict hiding (map)
 import Data.Maybe (fromJust)
 import Data.SBV
 import Data.SBV.Internals (genFromCV)
-import Spec2
+import Spec
 import Prelude hiding (lookup)
 
 -- | Creates an SBV predicate describing the problem,

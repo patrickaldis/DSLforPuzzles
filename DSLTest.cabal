@@ -21,11 +21,9 @@ library
                       transformers
 
     default-language: Haskell2010
-    exposed-modules:  Spec,
-                      Spec2,
-                      Reader,
-                      Reader2,
-                      DSL
+    exposed-modules:  DSL
+    other-modules:    Spec,
+                      Solve
 
     extra-libaries: z3
 
