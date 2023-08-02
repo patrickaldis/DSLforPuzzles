@@ -1,6 +1,11 @@
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
-module Solve (asPredicate, solveAll, printSols) where
+module Solve
+  ( asPredicate,
+    solveAll,
+    printSols,
+  )
+where
 
 import Control.Monad (forM, forM_)
 import Data.Map.Strict hiding (map)
@@ -16,15 +21,15 @@ asPredicate :: PuzzleInstance -> Predicate
 asPredicate inst =
   let -- Unwrap PuzzleInstance
       states = state inst
-      p = problem inst
+      struct = structure inst
+      pclass = puzzleclass inst
 
-      cellTypes = structure p
-      consts = constraints p
+      consts = rules pclass
    in do
         -- Create a bunch of free variables that constitute a board
-        emptyBoard cellTypes
+        emptyBoard struct
         >>= writeLiterals states
-        >>= applyConstraints consts cellTypes []
+        >>= applyRules consts struct []
 
 type PuzzleSolution = [[Word8]]
 
@@ -36,7 +41,7 @@ type PuzzleSolution = [[Word8]]
 solveAll :: PuzzleInstance -> IO [PuzzleSolution]
 solveAll inst = do
   sols <- allSat $ asPredicate inst
-  let ts = structure $ problem inst
+  let ts = structure inst
       dictionaries = getModelDictionaries sols
       arrays = do
         d <- dictionaries
@@ -124,30 +129,27 @@ writeLiterals s = mapM2d (uncurry f) . zip2d s
 
 -- }}}
 
-applyConstraints ::
-  [Constraint] ->
-  PuzzleStructure ->
-  [(Word8, Word8)] ->
-  SBoard ->
-  Symbolic SBool
-applyConstraints cs cellTypes bList board =
+applyRules :: [Rule] -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
+applyRules cs cellTypes bList board =
   sAnd
     <$> mapM
-      (\c -> applyConstraint c cellTypes bList board)
+      (\c -> applyRule c cellTypes bList board)
       cs
-  where
-    applyConstraint :: Constraint -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
-    applyConstraint (ForAll xType fExpr) ts bList board =
-      let xs = do
-            xs' <- zip2d board ts
-            (x, t) <- xs'
-            if cellName t == cellName xType && (not . elem (row x, col x) $ bList)
-              then [x]
-              else []
 
-          newbList x = (row x, col x) : bList
-       in sAnd <$> forM xs (\x -> applyConstraints (fExpr x) ts (newbList x) board)
-    applyConstraint (Exp expr) _ _ _ = return expr
+applyRule :: Rule -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
+applyRule (ForAll xType fExpr) ts bList board =
+  let xs = [x | xs' <- zip2d board ts, (x, t) <- xs', f x t]
+      f x t =
+        cellName t == cellName xType
+          && (row x, col x) `notElem` bList
+
+      newbList x = (row x, col x) : bList
+   in sAnd <$> forM xs (\x -> applyRules (fExpr x) ts (newbList x) board)
+applyRule (Constrain expr) _ _ _ = applyExpr expr
+
+applyExpr :: Expression -> Symbolic SBool
+applyExpr (Exp expr) = return expr
+applyExpr (Count _ _ fExpr) = applyExpr (fExpr 0)
 
 mapM2d :: Monad m => (a -> m b) -> [[a]] -> m [[b]]
 mapM2d f = mapM (mapM f)
@@ -158,13 +160,13 @@ map2d f = map (map f)
 zip2d :: [[a]] -> [[b]] -> [[(a, b)]]
 zip2d = zipWith zip
 
--- convert :: Constraint -> Predicate
+-- convert :: Rule -> Predicate
 -- convert = convert' ["X" ++ show n | n <- [1 ..]]
 --
--- convert' :: [String] -> Constraint -> Predicate
+-- convert' :: [String] -> Rule -> Predicate
 -- convert' (l : ls) (ForAll _ f) = do
 --   x <- free l :: Symbolic SInteger
---   let cs = f x :: [Constraint]
+--   let cs = f x :: [Rule]
 --   mapM_ (convert' ls) cs
 --   return sTrue
 -- convert' _ (Exp e) = constrain e >> return sTrue

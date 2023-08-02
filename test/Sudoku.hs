@@ -1,50 +1,54 @@
 module Sudoku (sudokuTests) where
 
 import DSL
-import Prelude hiding (div)
-import Test.Hspec
 import Data.Word (Word8)
+import Test.Hspec
+import Prelude hiding (div)
 
 sudokuTests :: SpecWith ()
-sudokuTests = 
+sudokuTests =
   describe "sudoku" $ do
     it "easy sudoku" $ do
       solveAll easySudoku >>= (\x -> head x `shouldBe` easySudokuSol)
 
-sudoku :: Problem
+numberCell :: CellType
+numberCell =
+  CellType
+    { cellName = "Number",
+      noValues = 9
+    }
+
+sudoku :: PuzzleClass
 sudoku =
-  let numberCell =
-        CellType
-          { cellName = "Number",
-            noValues = 9
-          }
-   in Problem
-        { name = "Sudoku",
-          structure = replicate 9 . replicate 9 $ numberCell,
-          constraints =
-            [ ForAll
-                numberCell
-                ( \x ->
-                    [ ForAll
-                        numberCell
-                        ( \y ->
-                            [ --
-                              Exp $ (row x .== row y) .=> (value x ./= value y),
-                              Exp $ (col x .== col y) .=> (value x ./= value y),
-                              Exp $
-                                ((col x `div` 3 .== col y `div` 3) .&& (row x `div` 3 .== row y `div` 3))
-                                  .=> (value x ./= value y)
-                            ]
-                        )
-                    ]
-                )
-            ]
-        }
+  PuzzleClass
+    { name = "Sudoku",
+      rules =
+        [ ForAll
+            numberCell
+            ( \x ->
+                [ ForAll
+                    numberCell
+                    ( \y ->
+                        [ --
+                          Constrain $ Exp $ (row x .== row y) .=> (value x ./= value y),
+                          Constrain $ Exp $ (col x .== col y) .=> (value x ./= value y),
+                          Constrain $
+                            Exp $
+                              ((col x `div` 3 .== col y `div` 3) .&& (row x `div` 3 .== row y `div` 3))
+                                .=> (value x ./= value y)
+                        ]
+                    )
+                ]
+            )
+        ],
+      types = [numberCell]
+    }
 
 easySudoku :: PuzzleInstance
 easySudoku =
   PuzzleInstance
-    { problem = sudoku,
+    { puzzleclass = sudoku,
+      structure = replicate 9 . replicate 9 $ numberCell,
       state =
         let noMaybes =
               [ [1, 0, 3, 0, 0, 0, 0, 8, 0],
