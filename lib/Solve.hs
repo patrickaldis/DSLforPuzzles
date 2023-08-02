@@ -99,16 +99,22 @@ emptyBoard ts = mapM2d (uncurry initialiseVar) (zip2d ts indices)
   where
     initialiseVar :: CellType -> (Word8, Word8) -> Symbolic CellVar
     initialiseVar t (i, j) = do
-      v <- free $ "X" ++ show i ++ ":" ++ show j :: Symbolic SWord8
-      constrain $ v .> 0 .&& v .< literal (noValues t + 1)
-      let cell =
+      let varName = "X" ++ show i ++ ":" ++ show j
+          cell v =
             CellVar
               { cellType = t,
                 value = v,
                 col = j,
                 row = i
               }
-      return cell
+      case possibleValues t of
+        Numeric n -> do
+          v <- free varName :: Symbolic SWord8
+          constrain $ v .>= 1 .&& v .<= literal n
+          return . cell $ NumericEntry v
+        Bool -> do
+          b <- free varName :: Symbolic SBool
+          return . cell $ BoolEntry b
 
 -- }}}
 
@@ -123,8 +129,9 @@ indices = [[(i, j) | j <- [0 ..]] | i <- [0 ..]]
 writeLiterals :: PuzzleState -> SBoard -> Symbolic SBoard -- {{{
 writeLiterals s = mapM2d (uncurry f) . zip2d s
   where
-    f :: Maybe Word8 -> CellVar -> Symbolic CellVar
-    f (Just n) x = constrain (value x .== literal n) >> return x
+    f :: Maybe CellEntry -> CellVar -> Symbolic CellVar
+    f (Just (NumericEntry n)) x = constrain (nValue x .== n) >> return x
+    f (Just (BoolEntry b)) x = constrain (bValue x .== b) >> return x
     f Nothing x = return x
 
 -- }}}
@@ -140,7 +147,7 @@ applyRule :: Rule -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic S
 applyRule (ForAll xType fExpr) ts bList board =
   let xs = [x | xs' <- zip2d board ts, (x, t) <- xs', f x t]
       f x t =
-        cellName t == cellName xType
+        typeName t == typeName xType
           && (row x, col x) `notElem` bList
 
       newbList x = (row x, col x) : bList

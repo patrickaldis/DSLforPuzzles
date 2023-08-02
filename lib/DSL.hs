@@ -1,30 +1,31 @@
 module DSL
   ( col,
     row,
-    value,
+    nValue,
+    bValue,
     Rule (..),
     Expression (..),
     CellType (..),
+    CellEntry (..),
+    CellEntrySet (..),
     PuzzleInstance (..),
     PuzzleClass (..),
     div,
+    literal,
     (.&&),
     (.==),
     (./=),
     (.=>),
-
     solveAll,
     printSols,
   )
 where
 
-import Prelude hiding (div)
-
 import Data.SBV
+import Solve
 import Spec hiding (col, row)
 import qualified Spec
-
-import Solve
+import Prelude hiding (div)
 
 col :: CellVar -> SWord8
 col = literal . Spec.col
@@ -34,3 +35,4 @@ row = literal . Spec.row
 
 div :: SWord8 -> SWord8 -> SWord8
 div = sDiv
+

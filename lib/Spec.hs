@@ -1,5 +1,9 @@
 module Spec
   ( CellType (..),
+    CellEntry (..),
+    nValue,
+    bValue,
+    CellEntrySet (..),
     CellVar (..),
     SBoard,
     Expression (..),
@@ -14,19 +18,55 @@ where
 import Data.SBV
 
 data CellType = CellType
-  { cellName :: String,
-    noValues :: Word8
+  { typeName :: String,
+    possibleValues :: CellEntrySet
   }
+
+data CellEntrySet  =
+  Numeric Word8
+  | Bool
+  -- | FSet [String]
 
 -- | A 2D array that identifies what cell is which type
 type PuzzleStructure = [[CellType]]
 
 data CellVar = CellVar
   { cellType :: CellType,
-    value :: SWord8,
+    value :: CellEntry,
     col :: Word8,
     row :: Word8
   }
+
+data CellEntry
+  = NumericEntry SWord8
+  | BoolEntry SBool
+
+instance Show CellEntry where
+  show (NumericEntry n) = show n
+  show (BoolEntry b) = show b
+  -- | FSetEntry SString
+
+nValue :: CellVar -> SWord8
+nValue c = case value c of
+  NumericEntry n -> n
+  BoolEntry _ -> error $ errorMsg c (Numeric 0)
+
+bValue :: CellVar -> SBool
+bValue c = case value c of
+  NumericEntry _ -> error $ errorMsg c Bool
+  BoolEntry b -> b
+
+errorMsg :: CellVar -> CellEntrySet -> String
+errorMsg c set = unwords [
+    "Error while casting types from variable: Expected",
+    writeType . possibleValues . cellType $ c,
+    "but got",
+    writeType set
+  ]
+  where
+    writeType :: CellEntrySet -> String
+    writeType (Numeric _) = "Numeric"
+    writeType Bool = "Bool"
 
 type SBoard = [[CellVar]]
 
@@ -50,7 +90,7 @@ data PuzzleClass = PuzzleClass
 
 -- Puzzle Instance Type
 -- A partially solved puzzle, and the acompannying rules
-type PuzzleState = [[Maybe Word8]]
+type PuzzleState = [[Maybe CellEntry]]
 
 -- | A partially filled out puzzle.
 -- Contains the Problem description, and the state of the board

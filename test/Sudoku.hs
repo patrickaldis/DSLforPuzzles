@@ -14,8 +14,8 @@ sudokuTests =
 numberCell :: CellType
 numberCell =
   CellType
-    { cellName = "Number",
-      noValues = 9
+    { typeName = "Number",
+      possibleValues = Numeric 9
     }
 
 sudoku :: PuzzleClass
@@ -30,12 +30,12 @@ sudoku =
                     numberCell
                     ( \y ->
                         [ --
-                          Constrain $ Exp $ (row x .== row y) .=> (value x ./= value y),
-                          Constrain $ Exp $ (col x .== col y) .=> (value x ./= value y),
+                          Constrain $ Exp $ (row x .== row y) .=> (nValue x ./= nValue y),
+                          Constrain $ Exp $ (col x .== col y) .=> (nValue x ./= nValue y),
                           Constrain $
                             Exp $
                               ((col x `div` 3 .== col y `div` 3) .&& (row x `div` 3 .== row y `div` 3))
-                                .=> (value x ./= value y)
+                                .=> (nValue x ./= nValue y)
                         ]
                     )
                 ]
@@ -61,9 +61,9 @@ easySudoku =
                 [0, 0, 0, 1, 5, 0, 4, 0, 0],
                 [0, 6, 0, 0, 0, 0, 2, 0, 3]
               ]
-            f :: Word8 -> Maybe Word8
+            f :: Word8 -> Maybe CellEntry
             f 0 = Nothing
-            f x = Just x
+            f x = Just . NumericEntry . literal $ x
          in map (map f) noMaybes
     }
 
