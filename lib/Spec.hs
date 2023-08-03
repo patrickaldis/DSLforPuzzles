@@ -1,9 +1,9 @@
 module Spec
   ( CellType (..),
     CellEntry (..),
-    nValue,
-    bValue,
+    CellProperty (..),
     CellEntrySet (..),
+    CellPropertySet,
     CellVar (..),
     SBoard,
     Expression (..),
@@ -12,14 +12,17 @@ module Spec
     PuzzleInstance (..),
     PuzzleStructure,
     PuzzleState,
+    CellState (..)
   )
 where
 
 import Data.SBV
+import Data.Map.Strict
 
 data CellType = CellType
   { typeName :: String,
-    possibleValues :: CellEntrySet
+    values :: CellEntrySet,
+    propertySets :: Map String CellPropertySet
   }
 
 data CellEntrySet  =
@@ -33,40 +36,22 @@ type PuzzleStructure = [[CellType]]
 data CellVar = CellVar
   { cellType :: CellType,
     value :: CellEntry,
-    col :: Word8,
-    row :: Word8
+    properties :: Map String CellProperty
   }
 
 data CellEntry
   = NumericEntry SWord8
   | BoolEntry SBool
 
+data CellProperty
+  = NumericProp Word8
+  | BoolProp Bool
+
+type CellPropertySet = CellEntrySet
+
 instance Show CellEntry where
   show (NumericEntry n) = show n
   show (BoolEntry b) = show b
-  -- | FSetEntry SString
-
-nValue :: CellVar -> SWord8
-nValue c = case value c of
-  NumericEntry n -> n
-  BoolEntry _ -> error $ errorMsg c (Numeric 0)
-
-bValue :: CellVar -> SBool
-bValue c = case value c of
-  NumericEntry _ -> error $ errorMsg c Bool
-  BoolEntry b -> b
-
-errorMsg :: CellVar -> CellEntrySet -> String
-errorMsg c set = unwords [
-    "Error while casting types from variable: Expected",
-    writeType . possibleValues . cellType $ c,
-    "but got",
-    writeType set
-  ]
-  where
-    writeType :: CellEntrySet -> String
-    writeType (Numeric _) = "Numeric"
-    writeType Bool = "Bool"
 
 type SBoard = [[CellVar]]
 
@@ -90,7 +75,11 @@ data PuzzleClass = PuzzleClass
 
 -- Puzzle Instance Type
 -- A partially solved puzzle, and the acompannying rules
-type PuzzleState = [[Maybe CellEntry]]
+type PuzzleState = [[CellState]]
+data CellState = CellState
+  {valueState :: Maybe CellEntry,
+  propertyStates :: Map String CellProperty
+  }
 
 -- | A partially filled out puzzle.
 -- Contains the Problem description, and the state of the board

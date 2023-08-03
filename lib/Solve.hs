@@ -4,6 +4,7 @@ module Solve
   ( asPredicate,
     solveAll,
     printSols,
+    PuzzleSolution
   )
 where
 
@@ -14,6 +15,7 @@ import Data.SBV
 import Data.SBV.Internals (genFromCV)
 import Spec
 import Prelude hiding (lookup)
+import Utils
 
 -- | Creates an SBV predicate describing the problem,
 -- from a `PuzzleInstance`
@@ -23,12 +25,12 @@ asPredicate inst =
       states = state inst
       struct = structure inst
       pclass = puzzleclass inst
-
       consts = rules pclass
    in do
         -- Create a bunch of free variables that constitute a board
         emptyBoard struct
-        >>= writeLiterals states
+        >>= writeProps states
+        >>= writeValues states
         >>= applyRules consts struct []
 
 type PuzzleSolution = [[Word8]]
@@ -82,7 +84,7 @@ printSols initial sols = do
               unwords
                 ( do
                     cell <- rows
-                    case cell of
+                    case valueState cell of
                       Just n -> return $ show n
                       Nothing -> return "?"
                 )
@@ -104,10 +106,12 @@ emptyBoard ts = mapM2d (uncurry initialiseVar) (zip2d ts indices)
             CellVar
               { cellType = t,
                 value = v,
-                col = j,
-                row = i
+                properties = fromList [
+                  ("col", NumericProp i),
+                  ("row", NumericProp j)
+                ]
               }
-      case possibleValues t of
+      case values t of
         Numeric n -> do
           v <- free varName :: Symbolic SWord8
           constrain $ v .>= 1 .&& v .<= literal n
@@ -126,16 +130,26 @@ varNames = map2d fst . zip2d varNamesInf
 indices :: [[(Word8, Word8)]]
 indices = [[(i, j) | j <- [0 ..]] | i <- [0 ..]]
 
-writeLiterals :: PuzzleState -> SBoard -> Symbolic SBoard -- {{{
-writeLiterals s = mapM2d (uncurry f) . zip2d s
+writeValues :: PuzzleState -> SBoard -> Symbolic SBoard -- {{{
+writeValues = zipMapM2d f
   where
-    f :: Maybe CellEntry -> CellVar -> Symbolic CellVar
-    f (Just (NumericEntry n)) x = constrain (nValue x .== n) >> return x
-    f (Just (BoolEntry b)) x = constrain (bValue x .== b) >> return x
-    f Nothing x = return x
+    f :: CellState -> CellVar -> Symbolic CellVar
+    f s x = do
+      case valueState s of
+        (Just (NumericEntry n)) -> constrain (nVal x .== n)
+        (Just (BoolEntry b)) -> constrain (bVal x .== b)
+        Nothing -> constrain sTrue
+      return x
+
+writeProps :: PuzzleState -> SBoard -> Symbolic SBoard
+writeProps = zipMapM2d f
+  where
+    f :: CellState -> CellVar -> Symbolic CellVar
+    f s x = return (x {
+      properties = properties x `union` propertyStates s
+    })
 
 -- }}}
-
 applyRules :: [Rule] -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
 applyRules cs cellTypes bList board =
   sAnd
@@ -148,10 +162,12 @@ applyRule (ForAll xType fExpr) ts bList board =
   let xs = [x | xs' <- zip2d board ts, (x, t) <- xs', f x t]
       f x t =
         typeName t == typeName xType
-          && (row x, col x) `notElem` bList
+          && coords x `notElem` bList
 
-      newbList x = (row x, col x) : bList
+      newbList x = coords x : bList
    in sAnd <$> forM xs (\x -> applyRules (fExpr x) ts (newbList x) board)
+  where
+      coords x = (rawRow x, rawCol x)
 applyRule (Constrain expr) _ _ _ = applyExpr expr
 
 applyExpr :: Expression -> Symbolic SBool
@@ -167,6 +183,8 @@ map2d f = map (map f)
 zip2d :: [[a]] -> [[b]] -> [[(a, b)]]
 zip2d = zipWith zip
 
+zipMapM2d :: Monad m => (a -> b1 -> m b2) -> [[a]] -> [[b1]] -> m [[b2]]
+zipMapM2d f s = mapM2d (uncurry f) . zip2d s
 -- convert :: Rule -> Predicate
 -- convert = convert' ["X" ++ show n | n <- [1 ..]]
 --

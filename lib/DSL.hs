@@ -1,15 +1,21 @@
 module DSL
-  ( col,
+  ( nVal,
+    bVal,
+    nProp,
+    bProp,
     row,
-    nValue,
-    bValue,
+    col,
     Rule (..),
     Expression (..),
     CellType (..),
     CellEntry (..),
     CellEntrySet (..),
+    CellProperty (..),
+    CellPropertySet,
     PuzzleInstance (..),
     PuzzleClass (..),
+    PuzzleSolution,
+    CellState (..),
     div,
     literal,
     (.&&),
@@ -23,15 +29,9 @@ where
 
 import Data.SBV
 import Solve
-import Spec hiding (col, row)
-import qualified Spec
+import Spec
+import Utils
 import Prelude hiding (div)
-
-col :: CellVar -> SWord8
-col = literal . Spec.col
-
-row :: CellVar -> SWord8
-row = literal . Spec.row
 
 div :: SWord8 -> SWord8 -> SWord8
 div = sDiv

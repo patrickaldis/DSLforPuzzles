@@ -4,18 +4,20 @@ import DSL
 import Data.Word (Word8)
 import Test.Hspec
 import Prelude hiding (div)
+import Data.Map.Strict (empty)
+import Utils
 
 sudokuTests :: SpecWith ()
 sudokuTests =
-  describe "sudoku" $ do
-    it "easy sudoku" $ do
-      solveAll easySudoku >>= (\x -> head x `shouldBe` easySudokuSol)
+  describe "Sudoku" $ do
+    it "Easy" $ do
+      easySudoku `shouldSolveTo` easySudokuSol
 
 numberCell :: CellType
 numberCell =
   CellType
     { typeName = "Number",
-      possibleValues = Numeric 9
+      values = Numeric 9
     }
 
 sudoku :: PuzzleClass
@@ -30,12 +32,12 @@ sudoku =
                     numberCell
                     ( \y ->
                         [ --
-                          Constrain $ Exp $ (row x .== row y) .=> (nValue x ./= nValue y),
-                          Constrain $ Exp $ (col x .== col y) .=> (nValue x ./= nValue y),
+                          Constrain $ Exp $ (row x .== row y) .=> (nVal x ./= nVal y),
+                          Constrain $ Exp $ (col x .== col y) .=> (nVal x ./= nVal y),
                           Constrain $
                             Exp $
                               ((col x `div` 3 .== col y `div` 3) .&& (row x `div` 3 .== row y `div` 3))
-                                .=> (nValue x ./= nValue y)
+                                .=> (nVal x ./= nVal y)
                         ]
                     )
                 ]
@@ -61,9 +63,9 @@ easySudoku =
                 [0, 0, 0, 1, 5, 0, 4, 0, 0],
                 [0, 6, 0, 0, 0, 0, 2, 0, 3]
               ]
-            f :: Word8 -> Maybe CellEntry
-            f 0 = Nothing
-            f x = Just . NumericEntry . literal $ x
+            f :: Word8 -> CellState
+            f 0 = CellState {valueState = Nothing, propertyStates = empty}            
+            f x = CellState {valueState = Just (NumericEntry $ literal x), propertyStates = empty}
          in map (map f) noMaybes
     }
 

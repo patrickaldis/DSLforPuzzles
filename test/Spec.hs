@@ -7,5 +7,6 @@ import Misc
 main :: IO ()
 main = hspec $ do
   miscTests
-  sudokuTests
+  describe "Puzzles" $ do
+    sudokuTests
 
