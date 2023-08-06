@@ -1,21 +1,24 @@
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
 module Solve
   ( asPredicate,
     solveAll,
+    solve,
     printSols,
-    PuzzleSolution
+    PuzzleSolution,
   )
 where
 
+import Component hiding (neighbors)
 import Control.Monad (forM, forM_)
-import Data.Map.Strict hiding (map)
+import Data.Map.Strict hiding (filter, map)
 import Data.Maybe (fromJust)
-import Data.SBV
+import Data.SBV hiding (solve)
 import Data.SBV.Internals (genFromCV)
 import Spec
+import Utils hiding (lookup)
 import Prelude hiding (lookup)
-import Utils
 
 -- | Creates an SBV predicate describing the problem,
 -- from a `PuzzleInstance`
@@ -42,7 +45,7 @@ type PuzzleSolution = [[Word8]]
 -- Giving the result as a grid of values
 solveAll :: PuzzleInstance -> IO [PuzzleSolution]
 solveAll inst = do
-  sols <- allSat $ asPredicate inst
+  sols <- allSatWith z3 $ asPredicate inst
   let ts = structure inst
       dictionaries = getModelDictionaries sols
       arrays = do
@@ -57,6 +60,15 @@ solveAll inst = do
 
         return $ map (map f) $ varNames ts
   return arrays
+
+solve :: PuzzleInstance -> IO (Maybe PuzzleSolution)
+solve x = do
+  sols <- solveAll x
+  return
+    ( case sols of
+        (x' : _) -> Just x'
+        _ -> Nothing
+    )
 
 -- | Pretty prints all solutions to the puzzle,
 -- with the original problem shown above
@@ -106,10 +118,11 @@ emptyBoard ts = mapM2d (uncurry initialiseVar) (zip2d ts indices)
             CellVar
               { cellType = t,
                 value = v,
-                properties = fromList [
-                  ("col", NumericProp i),
-                  ("row", NumericProp j)
-                ]
+                properties =
+                  fromList
+                    [ ("col", NumericProp i),
+                      ("row", NumericProp j)
+                    ]
               }
       case values t of
         Numeric n -> do
@@ -145,9 +158,12 @@ writeProps :: PuzzleState -> SBoard -> Symbolic SBoard
 writeProps = zipMapM2d f
   where
     f :: CellState -> CellVar -> Symbolic CellVar
-    f s x = return (x {
-      properties = properties x `union` propertyStates s
-    })
+    f s x =
+      return
+        ( x
+            { properties = properties x `union` propertyStates s
+            }
+        )
 
 -- }}}
 applyRules :: [Rule] -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
@@ -167,32 +183,31 @@ applyRule (ForAll xType fExpr) ts bList board =
       newbList x = coords x : bList
    in sAnd <$> forM xs (\x -> applyRules (fExpr x) ts (newbList x) board)
   where
-      coords x = (rawRow x, rawCol x)
-applyRule (Constrain expr) _ _ _ = applyExpr expr
+    coords x = (rawRow x, rawCol x)
+applyRule (Constrain expr) _ _ _ = return $ applyExpr expr
+applyRule (CountComponents binFunc fRule) ts bList board =
+  let binBoard = binarize binFunc board
+      cmap = components binBoard
+   in applyRule (fRule cmap) ts bList board
 
-applyExpr :: Expression -> Symbolic SBool
-applyExpr (Exp expr) = return expr
+binarize :: [BinarizeRule] -> SBoard -> [[SBool]]
+binarize rs' = map2d (f rs')
+  where
+    f :: [BinarizeRule] -> CellVar -> SBool
+    f rs v =
+      let tName = typeName . cellType $ v
+          r = case filter (\(For t _) -> typeName t == tName) rs of
+            [] -> For emptyType (\_ -> Exp sTrue)
+            (x : _) -> x
+       in g r v
+    g :: BinarizeRule -> CellVar -> SBool
+    g (For _ fExpr) v = applyExpr $ fExpr v
+
+applyExpr :: Expression -> SBool
+applyExpr (Exp expr) = expr
+applyExpr (If cond expr) = applyExpr cond .=> applyExpr expr
 applyExpr (Count _ _ fExpr) = applyExpr (fExpr 0)
-
-mapM2d :: Monad m => (a -> m b) -> [[a]] -> m [[b]]
-mapM2d f = mapM (mapM f)
-
-map2d :: (a -> b) -> [[a]] -> [[b]]
-map2d f = map (map f)
-
-zip2d :: [[a]] -> [[b]] -> [[(a, b)]]
-zip2d = zipWith zip
-
-zipMapM2d :: Monad m => (a -> b1 -> m b2) -> [[a]] -> [[b1]] -> m [[b2]]
-zipMapM2d f s = mapM2d (uncurry f) . zip2d s
--- convert :: Rule -> Predicate
--- convert = convert' ["X" ++ show n | n <- [1 ..]]
---
--- convert' :: [String] -> Rule -> Predicate
--- convert' (l : ls) (ForAll _ f) = do
---   x <- free l :: Symbolic SInteger
---   let cs = f x :: [Rule]
---   mapM_ (convert' ls) cs
---   return sTrue
--- convert' _ (Exp e) = constrain e >> return sTrue
--- convert' _ _ = return sTrue
+applyExpr (ConnectedBy x y cmap fExpr) =
+  let cmpX = lookupVar x cmap
+      cmpY = lookupVar y cmap
+   in applyExpr (fExpr $ cmpX .== cmpY)

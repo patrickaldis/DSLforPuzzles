@@ -5,8 +5,10 @@ module DSL
     bProp,
     row,
     col,
+    Utils.lookup,
     Rule (..),
     Expression (..),
+    BinarizeRule (..),
     CellType (..),
     CellEntry (..),
     CellEntrySet (..),
@@ -23,11 +25,12 @@ module DSL
     (./=),
     (.=>),
     solveAll,
+    solve,
     printSols,
   )
 where
 
-import Data.SBV
+import Data.SBV hiding (solve)
 import Solve
 import Spec
 import Utils
@@ -35,4 +38,3 @@ import Prelude hiding (div)
 
 div :: SWord8 -> SWord8 -> SWord8
 div = sDiv
-

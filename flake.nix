@@ -26,10 +26,10 @@
         pkgs = import nixpkgs { inherit system overlays; inherit (haskellNix) config; };
         flake = pkgs.hixProject.flake { };
         withz3 = outname: pname: 
-           pkgs.runCommandNoCC outname { buildInputs = [ pkgs.z3 pkgs.makeWrapper]; } ''
+           pkgs.runCommandNoCC outname { buildInputs = [ pkgs.z3_4_12 pkgs.makeWrapper]; } ''
               mkdir -p $out/bin
               makeWrapper ${flake.packages.${pname}}/bin/${outname} $out/bin/${outname} \
-                --set SBV_Z3 ${pkgs.z3}/bin/z3
+                --set SBV_Z3 ${pkgs.z3_4_12}/bin/z3
             '';
       in flake // rec {
       packages.default = packages.testing;

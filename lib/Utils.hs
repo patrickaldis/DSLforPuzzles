@@ -1,9 +1,10 @@
 module Utils where
 
-import Spec
-import Data.SBV
-import Data.Map.Strict ((!))
+import Data.Map.Strict (empty, (!))
 import Data.Maybe (fromJust)
+import Data.SBV
+import Spec
+import Prelude hiding (lookup)
 
 nVal :: CellVar -> SWord8
 nVal = castToNum . value
@@ -20,6 +21,15 @@ rawNProp pname = castPropToNum . (! pname) . properties
 bProp :: String -> CellVar -> SBool
 bProp pname = literal . castPropToBool . (! pname) . properties
 
+lookup :: Index -> [[a]] -> a
+lookup ix a = let (i, j) = fromEnum <$$> ix in a !! (i - 1) !! (j - 1)
+
+(<$$>) :: (a -> b) -> (a, a) -> (b, b)
+(<$$>) f (x, y) = (f x, f y)
+
+lookupVar :: CellVar -> [[a]] -> a
+lookupVar x vs = let ix = (rawRow x + 1, rawCol x + 1) in lookup ix vs
+
 col :: CellVar -> SWord8
 col = nProp "col"
 
@@ -29,8 +39,28 @@ row = nProp "row"
 rawCol :: CellVar -> Word8
 rawCol = fromJust . unliteral . literal . rawNProp "col"
 
-rawRow ::CellVar -> Word8
+rawRow :: CellVar -> Word8
 rawRow = fromJust . unliteral . literal . rawNProp "row"
+
+mapM2d :: Monad m => (a -> m b) -> [[a]] -> m [[b]]
+mapM2d f = mapM (mapM f)
+
+map2d :: (a -> b) -> [[a]] -> [[b]]
+map2d f = map (map f)
+
+zip2d :: [[a]] -> [[b]] -> [[(a, b)]]
+zip2d = zipWith zip
+
+zipMapM2d :: Monad m => (a -> b1 -> m b2) -> [[a]] -> [[b1]] -> m [[b2]]
+zipMapM2d f s = mapM2d (uncurry f) . zip2d s
+
+emptyType :: CellType
+emptyType =
+  CellType
+    { typeName = "emptyType",
+      values = Numeric 0,
+      propertySets = empty
+    }
 
 castToBool :: CellEntry -> SBool
 castToBool (BoolEntry b) = b
@@ -66,11 +96,11 @@ instance HasCellType CellProperty where
 instance HasCellType CellVar where
   printType = printType . value
 
-errorMsg :: (HasCellType a , HasCellType b) => a -> b -> String
-errorMsg val target = unwords [
-    "Error while retrieving types from variable: Expected",
-    printType target,
-    "but got",
-    printType val
-  ]
-
+errorMsg :: (HasCellType a, HasCellType b) => a -> b -> String
+errorMsg val target =
+  unwords
+    [ "Error while retrieving types from variable: Expected",
+      printType target,
+      "but got",
+      printType val
+    ]

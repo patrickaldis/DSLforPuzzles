@@ -1,11 +1,11 @@
 module Sudoku (sudokuTests) where
 
 import DSL
+import Data.Map.Strict (empty)
 import Data.Word (Word8)
 import Test.Hspec
-import Prelude hiding (div)
-import Data.Map.Strict (empty)
 import Utils
+import Prelude hiding (div)
 
 sudokuTests :: SpecWith ()
 sudokuTests =
@@ -17,7 +17,8 @@ numberCell :: CellType
 numberCell =
   CellType
     { typeName = "Number",
-      values = Numeric 9
+      values = Numeric 9,
+      propertySets = empty
     }
 
 sudoku :: PuzzleClass
@@ -64,7 +65,7 @@ easySudoku =
                 [0, 6, 0, 0, 0, 0, 2, 0, 3]
               ]
             f :: Word8 -> CellState
-            f 0 = CellState {valueState = Nothing, propertyStates = empty}            
+            f 0 = CellState {valueState = Nothing, propertyStates = empty}
             f x = CellState {valueState = Just (NumericEntry $ literal x), propertyStates = empty}
          in map (map f) noMaybes
     }

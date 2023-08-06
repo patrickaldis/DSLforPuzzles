@@ -1,11 +1,13 @@
 module Misc (miscTests) where
 
+import Connectivity
 import DSL
 import Data.Map.Strict
+import Data.SBV (sTrue)
 import Data.Word (Word8)
 import Test.Hspec
-import Prelude hiding (div)
 import Utils
+import Prelude hiding (div)
 
 miscTests :: SpecWith ()
 miscTests =
@@ -14,6 +16,7 @@ miscTests =
       boolTest `shouldSolveTo` boolTestSol
     it "Properties" $ do
       propTest `shouldSolveTo` propTestSol
+    connectivityTests
 
 boolCell :: CellType
 boolCell =
@@ -35,8 +38,14 @@ bool =
                     boolCell
                     ( \y ->
                         [ --
-                          Constrain $ Exp $ (row x .== row y) .=> (bVal x ./= bVal y),
-                          Constrain $ Exp $ (col x .== col y) .=> (bVal x ./= bVal y)
+                          Constrain $
+                            If
+                              (Exp $ row x .== row y)
+                              (Exp $ bVal x ./= bVal y),
+                          Constrain $
+                            If
+                              (Exp $ col x .== col y)
+                              (Exp $ bVal x ./= bVal y)
                         ]
                     )
                 ]
@@ -91,7 +100,7 @@ propTest =
     { puzzleclass = prop,
       structure = replicate 2 . replicate 2 $ propCell,
       state =
-        let c x = CellState {valueState = Nothing , propertyStates = fromList [("Value", NumericProp x)]}
+        let c x = CellState {valueState = Nothing, propertyStates = fromList [("Value", NumericProp x)]}
          in [[c 1, c 2], [c 3, c 4]]
     }
 

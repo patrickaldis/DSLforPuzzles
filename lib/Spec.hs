@@ -5,19 +5,55 @@ module Spec
     CellEntrySet (..),
     CellPropertySet,
     CellVar (..),
+    Index,
     SBoard,
     Expression (..),
     Rule (..),
+    ComponentMap,
+    BinarizeRule (..),
     PuzzleClass (..),
     PuzzleInstance (..),
     PuzzleStructure,
     PuzzleState,
-    CellState (..)
+    CellState (..),
   )
 where
 
-import Data.SBV
 import Data.Map.Strict
+import Data.SBV
+
+-- Puzzle Rules Type:
+-- A type to define restrictions on the contents of the cells
+data Rule
+  = ForAll CellType (CellVar -> [Rule])
+  | Constrain Expression
+  | CountComponents [BinarizeRule] (ComponentMap -> Rule)
+
+data Expression
+  = Exp SBool
+  | If Expression Expression
+  | Count CellType Rule (SWord8 -> Expression)
+  | ConnectedBy CellVar CellVar ComponentMap (SBool -> Expression)
+
+data BinarizeRule
+  = For CellType (CellVar -> Expression)
+
+-- | A description of the layout and rules of a puzzle.
+-- Comprises of `structure` and `constraints`
+data PuzzleClass = PuzzleClass
+  { name :: String,
+    rules :: [Rule],
+    types :: [CellType]
+  }
+
+-- Puzzle Instance Type
+-- A partially solved puzzle, and the acompannying rules
+type PuzzleState = [[CellState]]
+
+data CellState = CellState
+  { valueState :: Maybe CellEntry,
+    propertyStates :: Map String CellProperty
+  }
 
 data CellType = CellType
   { typeName :: String,
@@ -25,10 +61,11 @@ data CellType = CellType
     propertySets :: Map String CellPropertySet
   }
 
-data CellEntrySet  =
-  Numeric Word8
+data CellEntrySet
+  = Numeric Word8
   | Bool
-  -- | FSet [String]
+
+-- \| FSet [String]
 
 -- | A 2D array that identifies what cell is which type
 type PuzzleStructure = [[CellType]]
@@ -38,6 +75,10 @@ data CellVar = CellVar
     value :: CellEntry,
     properties :: Map String CellProperty
   }
+
+type Index = (Word8, Word8)
+
+type ComponentMap = [[SWord8]]
 
 data CellEntry
   = NumericEntry SWord8
@@ -54,32 +95,6 @@ instance Show CellEntry where
   show (BoolEntry b) = show b
 
 type SBoard = [[CellVar]]
-
--- Puzzle Rules Type:
--- A type to define restrictions on the contents of the cells
-data Rule
-  = ForAll CellType (CellVar -> [Rule])
-  | Constrain Expression
-
-data Expression
-  = Exp SBool
-  | Count CellType Rule (Word8 -> Expression)
-
--- | A description of the layout and rules of a puzzle.
--- Comprises of `structure` and `constraints`
-data PuzzleClass = PuzzleClass
-  { name :: String,
-    rules :: [Rule],
-    types :: [CellType]
-  }
-
--- Puzzle Instance Type
--- A partially solved puzzle, and the acompannying rules
-type PuzzleState = [[CellState]]
-data CellState = CellState
-  {valueState :: Maybe CellEntry,
-  propertyStates :: Map String CellProperty
-  }
 
 -- | A partially filled out puzzle.
 -- Contains the Problem description, and the state of the board
