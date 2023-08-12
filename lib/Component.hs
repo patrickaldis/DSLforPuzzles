@@ -1,4 +1,4 @@
-module Component (components, dfs, neighbors, applyDFS) where
+module Component (components, dfs, neighbors, applyDFS, Label) where
 
 import Data.List ((\\))
 import qualified Data.Map.Strict as M
