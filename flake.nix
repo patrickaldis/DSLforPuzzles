@@ -33,8 +33,8 @@
             '';
       in flake // rec {
       packages.default = packages.testing;
-      packages.exe = withz3 "DSLTest" "DSLTest:exe:DSLTest";
-      packages.testing = withz3 "testing" "DSLTest:test:testing";
+      packages.exe = withz3 "PuzzleDSL" "PuzzleDSL:exe:PuzzleDSL";
+      packages.testing = withz3 "testing" "PuzzleDSL:test:testing";
       });
 
   # --- Flake Local Nix Configuration ----------------------------

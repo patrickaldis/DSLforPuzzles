@@ -1,5 +1,5 @@
 cabal-version:      3.0
-name:               DSLTest
+name:               PuzzleDSL
 version:            0.1.0.0
 license:            BSD-2-Clause
 license-file:       LICENSE
@@ -18,7 +18,8 @@ library
     build-depends:    base,
                       sbv,
                       containers,
-                      massiv,
+                      array,
+                      placeholders,
                       transformers
 
     default-language: Haskell2010
@@ -26,15 +27,16 @@ library
                       Component
     other-modules:    Spec,
                       Utils,
+                      Rule,
                       Solve
 
-executable DSLTest
+executable PuzzleDSL
     import:           warnings
     main-is:          Main.hs
     build-depends:    base,
                       sbv,
                       transformers,
-                      DSLTest
+                      PuzzleDSL
 
     extra-libraries:  z3
     hs-source-dirs:   app
@@ -46,9 +48,10 @@ test-suite testing
     main-is:          Spec.hs
     build-depends:    base,
                       hspec,
+                      QuickCheck,
                       sbv,
                       containers,
-                      DSLTest
+                      PuzzleDSL
     default-language: Haskell2010
     hs-source-dirs:   test
     other-modules:    Sudoku,

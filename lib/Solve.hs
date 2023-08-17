@@ -10,12 +10,12 @@ module Solve
   )
 where
 
-import Component hiding (neighbors)
-import Control.Monad (forM, forM_)
+import Control.Monad (forM_)
 import Data.Map.Strict hiding (filter, map)
 import Data.Maybe (fromJust)
 import Data.SBV hiding (solve)
 import Data.SBV.Internals (genFromCV)
+import Rule (applyRules)
 import Spec
 import Utils hiding (lookup)
 import Prelude hiding (lookup)
@@ -166,48 +166,3 @@ writeProps = zipMapM2d f
         )
 
 -- }}}
-applyRules :: [Rule] -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
-applyRules cs cellTypes bList board =
-  sAnd
-    <$> mapM
-      (\c -> applyRule c cellTypes bList board)
-      cs
-
-applyRule :: Rule -> PuzzleStructure -> [(Word8, Word8)] -> SBoard -> Symbolic SBool
-applyRule (ForAll xType fExpr) ts bList board =
-  let xs = [x | xs' <- zip2d board ts, (x, t) <- xs', f x t]
-      f x t =
-        typeName t == typeName xType
-          && coords x `notElem` bList
-
-      newbList x = coords x : bList
-   in sAnd <$> forM xs (\x -> applyRules (fExpr x) ts (newbList x) board)
-  where
-    coords x = (rawRow x, rawCol x)
-applyRule (Constrain expr) _ _ _ = return $ applyExpr expr
-applyRule (CountComponents binFunc fRule) ts bList board =
-  let binBoard = binarize binFunc board
-      cmap = components binBoard
-   in applyRule (fRule cmap) ts bList board
-
-binarize :: [BinarizeRule] -> SBoard -> [[SBool]]
-binarize rs' = map2d (f rs')
-  where
-    f :: [BinarizeRule] -> CellVar -> SBool
-    f rs v =
-      let tName = typeName . cellType $ v
-          r = case filter (\(For t _) -> typeName t == tName) rs of
-            [] -> For emptyType (\_ -> Exp sTrue)
-            (x : _) -> x
-       in g r v
-    g :: BinarizeRule -> CellVar -> SBool
-    g (For _ fExpr) v = applyExpr $ fExpr v
-
-applyExpr :: Expression -> SBool
-applyExpr (Exp expr) = expr
-applyExpr (If cond expr) = applyExpr cond .=> applyExpr expr
-applyExpr (Count _ _ fExpr) = applyExpr (fExpr 0)
-applyExpr (ConnectedBy x y cmap fExpr) =
-  let cmpX = lookupVar x cmap
-      cmpY = lookupVar y cmap
-   in applyExpr (fExpr $ cmpX .== cmpY)

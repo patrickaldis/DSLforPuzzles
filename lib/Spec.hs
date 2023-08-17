@@ -1,3 +1,6 @@
+-- |
+-- Module: Spec
+-- Specifies all the datatypes used in the DSL
 module Spec
   ( CellType (..),
     CellEntry (..),
@@ -16,19 +19,27 @@ module Spec
     PuzzleStructure,
     PuzzleState,
     CellState (..),
+    emptyType,
   )
 where
 
 import Data.Map.Strict
 import Data.SBV
 
--- Puzzle Rules Type:
--- A type to define restrictions on the contents of the cells
+-- | Base datatype for expressing rules in the DSL
 data Rule
-  = ForAll CellType (CellVar -> [Rule])
-  | Constrain Expression
-  | CountComponents [BinarizeRule] (ComponentMap -> Rule)
+  = -- | `ForAll` constructor iterates over all cells of a given type
+    ForAll CellType (CellVar -> [Rule])
+  | -- | `Constrain` enforces constraints on the variables in scope
+    Constrain Expression
+  | -- | `CountComponents` computes the components of the grid according
+    -- to the binarize rule. It then passes the `ComponentMap` to the
+    -- Second argument of the constructor, where it can be used in the
+    -- `ConnectedBy` expression
+    CountComponents [BinarizeRule] (ComponentMap -> Rule)
 
+-- | Datatype for expressing term-level expresions. In an
+-- `Expression`, all variables are in scope
 data Expression
   = Exp SBool
   | If Expression Expression
@@ -61,6 +72,14 @@ data CellType = CellType
     propertySets :: Map String CellPropertySet
   }
 
+emptyType :: CellType
+emptyType =
+  CellType
+    { typeName = "emptyType",
+      values = Numeric 0,
+      propertySets = empty
+    }
+
 data CellEntrySet
   = Numeric Word8
   | Bool
@@ -70,6 +89,11 @@ data CellEntrySet
 -- | A 2D array that identifies what cell is which type
 type PuzzleStructure = [[CellType]]
 
+-- | ADT used to represent a cell in a puzzle.
+-- Each cell in the puzzle contains:
+-- - A celltype: defines the type and range of the cell value.
+-- - A value: the value itself
+-- - Properties: additional values added specific to the puzzle
 data CellVar = CellVar
   { cellType :: CellType,
     value :: CellEntry,
@@ -78,7 +102,7 @@ data CellVar = CellVar
 
 type Index = (Word8, Word8)
 
-type ComponentMap = [[SWord8]]
+type ComponentMap = [[SBool]]
 
 data CellEntry
   = NumericEntry SWord8

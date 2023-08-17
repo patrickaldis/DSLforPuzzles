@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   # name = "diss";
-  compiler-nix-name = "ghc927"; # Version of GHC to use
+  compiler-nix-name = "ghc928"; # Version of GHC to use
 
   # Cross compilation support:
   # crossPlatforms = p: pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 ([

@@ -1,3 +1,11 @@
+-- |
+-- Module : DSL
+-- Contains all functions necessary to describe a puzzle in the language
+--
+-- The intention is that all a user has to do is write:
+-- import DSL
+--
+-- And have everything they need
 module DSL
   ( nVal,
     bVal,
