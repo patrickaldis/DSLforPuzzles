@@ -56,7 +56,9 @@ test-suite testing
     hs-source-dirs:   test, lib
     other-modules:    Tests.Puzzles.Sudoku,
                       Tests.Features.Connectivity,
-                      Tests.Features.Misc,
+                      Tests.Features.Bool,
+                      Tests.Features.Spec,
+                      Tests.Features.Property,
                       Tests.Utils,
                       PuzzleDSL.Internal.Component
 
