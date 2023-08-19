@@ -1,12 +1,11 @@
-module Misc (miscTests) where
+module Tests.Features.Misc (miscTests) where
 
-import Connectivity
 import Data.Map.Strict
-import Data.SBV (sTrue)
 import Data.Word (Word8)
 import PuzzleDSL.DSL
 import Test.Hspec
-import Utils
+import Tests.Features.Connectivity
+import Tests.Utils
 import Prelude hiding (div)
 
 miscTests :: SpecWith ()

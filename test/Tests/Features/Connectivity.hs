@@ -1,4 +1,4 @@
-module Connectivity (connectivityTests) where
+module Tests.Features.Connectivity (connectivityTests) where
 
 import Data.Maybe (fromJust)
 import Data.SBV hiding (name)

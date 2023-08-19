@@ -1,4 +1,4 @@
-module Utils where
+module Tests.Utils where
 
 import PuzzleDSL.DSL
 import Test.Hspec (shouldBe)

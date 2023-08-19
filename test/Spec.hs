@@ -1,12 +1,11 @@
 module Main where
 
 import Test.Hspec
-import Sudoku
-import Misc
+import Tests.Features.Misc
+import Tests.Puzzles.Sudoku
 
 main :: IO ()
 main = hspec $ do
   miscTests
   describe "Puzzles" $ do
     sudokuTests
-
