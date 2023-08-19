@@ -1,6 +1,6 @@
 module Utils where
 
-import DSL
+import PuzzleDSL.DSL
 import Test.Hspec (shouldBe)
 
 shouldSolveTo :: PuzzleInstance -> PuzzleSolution -> IO ()

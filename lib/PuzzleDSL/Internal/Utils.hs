@@ -2,12 +2,12 @@
 -- Functions are listed here, rather than directly in `DSL`
 -- such as not to create a cyclic dependency, as they are likely
 -- used in `Solve` also
-module Utils where
+module PuzzleDSL.Internal.Utils where
 
 import Data.Map.Strict ((!))
 import Data.Maybe (fromJust)
 import Data.SBV
-import Spec
+import PuzzleDSL.Internal.Spec
 import Prelude hiding (lookup)
 
 -- | Unwraps a numeric cell value from a `CellVar`

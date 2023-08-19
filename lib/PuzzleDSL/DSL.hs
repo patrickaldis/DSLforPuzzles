@@ -6,14 +6,14 @@
 -- import DSL
 --
 -- And have everything they need
-module DSL
+module PuzzleDSL.DSL
   ( nVal,
     bVal,
     nProp,
     bProp,
     row,
     col,
-    Utils.lookup,
+    PuzzleDSL.Internal.Utils.lookup,
     Rule (..),
     Expression (..),
     BinarizeRule (..),
@@ -39,9 +39,9 @@ module DSL
 where
 
 import Data.SBV hiding (solve)
-import Solve
-import Spec
-import Utils
+import PuzzleDSL.Internal.Solve
+import PuzzleDSL.Internal.Spec
+import PuzzleDSL.Internal.Utils
 import Prelude hiding (div)
 
 div :: SWord8 -> SWord8 -> SWord8

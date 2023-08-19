@@ -1,14 +1,11 @@
 module Connectivity (connectivityTests) where
 
-import Component
-import DSL
 import Data.Maybe (fromJust)
 import Data.SBV hiding (name)
 import qualified Data.SBV.List as L
 import Data.SBV.Tuple
+import PuzzleDSL.Internal.Component
 import Test.Hspec
-import Test.QuickCheck
-import Utils
 import Prelude hiding (lookup)
 
 connectivityTests :: SpecWith ()

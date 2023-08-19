@@ -1,8 +1,8 @@
 module Sudoku (sudokuTests) where
 
-import DSL
 import Data.Map.Strict (empty)
 import Data.Word (Word8)
+import PuzzleDSL.DSL
 import Test.Hspec
 import Utils
 import Prelude hiding (div)

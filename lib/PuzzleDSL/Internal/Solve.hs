@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
-module Solve
+module PuzzleDSL.Internal.Solve
   ( asPredicate,
     solveAll,
     solve,
@@ -15,9 +15,9 @@ import Data.Map.Strict hiding (filter, map)
 import Data.Maybe (fromJust)
 import Data.SBV hiding (solve)
 import Data.SBV.Internals (genFromCV)
-import Rule (applyRules)
-import Spec
-import Utils hiding (lookup)
+import PuzzleDSL.Internal.Rule (applyRules)
+import PuzzleDSL.Internal.Spec
+import PuzzleDSL.Internal.Utils hiding (lookup)
 import Prelude hiding (lookup)
 
 -- | Creates an SBV predicate describing the problem,
