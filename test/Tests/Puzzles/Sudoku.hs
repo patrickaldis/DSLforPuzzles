@@ -1,10 +1,10 @@
-module Sudoku (sudokuTests) where
+module Tests.Puzzles.Sudoku (sudokuTests) where
 
-import DSL
 import Data.Map.Strict (empty)
 import Data.Word (Word8)
+import PuzzleDSL.DSL
 import Test.Hspec
-import Utils
+import Tests.Utils
 import Prelude hiding (div)
 
 sudokuTests :: SpecWith ()

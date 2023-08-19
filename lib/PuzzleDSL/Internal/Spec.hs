@@ -1,7 +1,7 @@
 -- |
 -- Module: Spec
 -- Specifies all the datatypes used in the DSL
-module Spec
+module PuzzleDSL.Internal.Spec
   ( CellType (..),
     CellEntry (..),
     CellProperty (..),

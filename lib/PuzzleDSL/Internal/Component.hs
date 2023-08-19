@@ -1,14 +1,11 @@
-{-# LANGUAGE TemplateHaskell #-}
-
-module Component (compRelation, dfs, dfs', neighbors, slookup, sFst, Label) where
+module PuzzleDSL.Internal.Component (compRelation, dfs, dfs', neighbors, slookup, sFst, Label) where
 
 import Data.List ()
-import qualified Data.Map.Strict as M
 import Data.SBV
 import qualified Data.SBV.List as L
 import Data.SBV.Tuple (tuple, untuple)
-import Spec
-import Utils
+import PuzzleDSL.Internal.Spec
+import PuzzleDSL.Internal.Utils
 import Prelude hiding (lookup)
 
 type Label = (Index, Word8)

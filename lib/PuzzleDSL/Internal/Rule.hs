@@ -1,13 +1,13 @@
 -- |
 -- Module: Rule
 -- Contains functions for parsing rules to produce `sbv` expressions
-module Rule (applyRules) where
+module PuzzleDSL.Internal.Rule (applyRules) where
 
-import Component (compRelation)
 import Control.Monad (forM)
 import Data.SBV
-import Spec
-import Utils
+import PuzzleDSL.Internal.Component
+import PuzzleDSL.Internal.Spec
+import PuzzleDSL.Internal.Utils
 
 -- | Takes a list of rules and enforce them on the supplied grid
 -- `cs cellTypes bList board`
