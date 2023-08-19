@@ -1,0 +1,50 @@
+-- Sudoku
+---
+NumberCell:
+  Value: Int
+---
+
+For x, y NumberCell:
+  If row x == row y Then:
+    x /= y
+  If col x == col y Then:
+    x /= y
+  If col x `div` 3 == col y `div` 3 && row x `div` 3 == row y `div` 3 Then:
+    x /= y
+
+-- Ripple Effect
+---
+name: Ripple Effect
+cells:
+  NumberCell:
+    Value: Int
+    Properties:
+      Region: Int
+---
+
+For x NumberCell:
+  x > 0
+  x < Count (For z NumberCell: region x == region z)
+  For y NumberCell:
+    If region x == region y Then:
+      x /= y
+    If row x == row y && x == y Then:
+      col x - col y + 2 > x || col y - col x + 2 > x
+    If col x == col y && x == y Then:
+      row x - row y + 2 > x || row y - row x + 2 > x
+
+-- Norinori
+---
+name: Norinori
+cells:
+  Cell:
+    Value: Bool
+    Properties:
+      Region: Int
+---
+
+For x Cell:
+  2 == Count (For y Cell: region y == region x && y)
+  If x Then:
+    1 == Count (For y Cell: y neighbor x && y)
+

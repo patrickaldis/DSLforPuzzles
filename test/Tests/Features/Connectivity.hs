@@ -19,30 +19,14 @@ connectivityTests = describe "Connectivity" $ do
       shouldBe
         (fromJust . unliteral $ slookup (literal (2, 2)) simple)
         True
-    it "dfs (literals)" $ do
-      shouldBe
-        (fromJust . unliteral $ dfs' simple (literal (1, 1)) (literal simpleIx) 1)
-        dfsSol
-    -- it "applyDFS (literals)" $ do
-    --   shouldBe (fromJust . unliteral $ applyDFS simple $ literal ([], simpleIx, 1)) ([], [], 0)
-    -- it "components (literals)" $ do
-    --   shouldBe (show $ components simple) ""
+    it "<~> (literals)" $ do
+      conTest `shouldBe` True
     it "slookup (unknowns)" $ do
       allSat unknownLookup >>= (`shouldBe` "Solution #1:\n  s0 = (3,3) :: (Word8, Word8)\nSolution #2:\n  s0 = (4,3) :: (Word8, Word8)\nSolution #3:\n  s0 = (3,1) :: (Word8, Word8)\nSolution #4:\n  s0 = (1,1) :: (Word8, Word8)\nSolution #5:\n  s0 = (3,4) :: (Word8, Word8)\nSolution #6:\n  s0 = (4,4) :: (Word8, Word8)\nSolution #7:\n  s0 = (1,4) :: (Word8, Word8)\nSolution #8:\n  s0 = (1,2) :: (Word8, Word8)\nSolution #9:\n  s0 = (2,2) :: (Word8, Word8)\nSolution #10:\n  s0 = (2,1) :: (Word8, Word8)\nFound 10 different solutions.") . show
     it "neighbors (unknowns)" $ do
       allSat unknownNeighbors >>= (`shouldBe` "Solution #1:\n  s0 = (1,2) :: (Word8, Word8)\nThis is the only solution.") . show
-
--- it "dfs (unknowns)" $ do
---   allSat unknownDFS >>= (`shouldBe` "Solution #1:\n  s0 = True :: Bool\nThis is the only solution.") . show
--- it "components (unknowns)" $ do
---   allSat unknownComp >>= (`shouldBe` "") . show
-
--- it "components (unknowns)" $ do
---   allSat unknownComp >>= (`shouldBe` "") . show
-
--- describe "Puzzle Tests" $ do
---   it "Simple Connectivity" $ do
---     connectedToTest `shouldSolveTo` connectedToTestSol
+    it "<~> (unknowns)" $ do
+      conTestUnknown >>= \r -> r `shouldBe` []
 
 simple :: [[SBool]]
 simple =
@@ -62,32 +46,38 @@ simpleSol =
     [0, 0, 3, 3]
   ]
 
-simpleIx :: [(Word8, Word8)]
-simpleIx = [(toEnum i, toEnum j) | i <- [1 .. 4], j <- [1 .. 4]]
+conTest :: Bool
+conTest =
+  fromJust . unliteral $
+    isConnectedIx
+      simple
+      L.nil
+      (literal (1, 1))
+      (literal (1, 1))
 
-dfsSol :: ([((Word8, Word8), Word8)], [(Word8, Word8)])
-dfsSol =
-  ( [ ((1, 1), 1),
-      ((1, 2), 1),
-      ((1, 3), 0),
-      ((2, 2), 1),
-      ((2, 1), 1),
-      ((3, 1), 1),
-      ((3, 2), 0),
-      ((4, 1), 0),
-      ((2, 3), 0)
-    ],
-    [ (1, 1),
-      (1, 2),
-      (1, 3),
-      (2, 2),
-      (2, 1),
-      (3, 1),
-      (3, 2),
-      (4, 1),
-      (2, 3)
-    ]
-  )
+conTestUnknown :: IO String
+conTestUnknown = do
+  r <-
+    allSat
+      ( do
+          x <- free_
+          let t = sTrue
+              f = sFalse
+              bs =
+                [ [t, t, t, t],
+                  [x, f, f, f],
+                  [t, f, f, f],
+                  [t, f, f, f]
+                ]
+              statement =
+                isConnectedIx
+                  bs
+                  L.nil
+                  (literal (3, 1))
+                  (literal (1, 2))
+          pure $ statement .== sTrue
+      )
+  return . show $ r
 
 unknownLookup :: Symbolic SBool
 unknownLookup = do
@@ -100,108 +90,8 @@ unknownNeighbors = do
   x <- free_
   return $ neighbors (4, 4) (literal (2, 2)) .== L.implode [literal (3, 2), literal (2, 3), x, literal (2, 1)]
 
-unknownDFS :: Symbolic SBool
-unknownDFS = do
-  x <- free_
-  let t = sTrue
-      f = sFalse
-      bs =
-        [ [t, t, t, t],
-          [x, f, f, f],
-          [t, f, f, f],
-          [t, f, f, f]
-        ]
-      ix = literal (1, 1)
-
-      (ls, _) = untuple $ dfs' bs ix (literal simpleIx) 1
-  return $ literal ((1, 3), 1) `L.elem` ls
-
-unknownComp :: Symbolic SBool
-unknownComp = do
-  x <- free_
-  -- y <- free_
-  let t = sTrue
-      f = sFalse
-      bs =
-        [ [t, t, t, t],
-          [x, f, f, f],
-          [t, f, f, f],
-          [t, f, f, f]
-        ]
-      cmp1 = dfs bs (literal (3, 1))
-      cmp2 = dfs bs (literal (1, 3))
-      cmp1' = sFst $ dfs' bs (literal (1, 1)) (literal simpleIx) 1
-      cmp2' = sFst $ dfs' bs (literal (1, 3)) (literal simpleIx) 1
-  return $
-    sAnd
-      [ literal ((1, 3), 1) `L.elem` cmp1'
-      -- literal (3, 1) `L.elem` cmp2
-      ]
-
 isIndex :: SBV (Word8, Word8) -> SBool
 isIndex x = let (i, j) = untuple x in sAnd [1 .<= i, i .<= 4, 1 .<= j, j .<= 4]
 
 map2d :: (a -> b) -> [[a]] -> [[b]]
 map2d f = map (map f)
-
--- connectedTo :: PuzzleClass
--- connectedTo =
---   PuzzleClass
---     { name = "Connected To Test",
---       rules =
---         [ CountComponents
---             [For boolCell (\c -> Exp $ bVal c .== sTrue)]
---             ( \comp ->
---                 ForAll
---                   boolCell
---                   ( \x ->
---                       [ ForAll
---                           boolCell
---                           ( \y ->
---                               [ --
---                                 Constrain $
---                                   ConnectedBy
---                                     x
---                                     y
---                                     comp
---                                     (\r -> If (Exp $ bVal x .== sTrue .&& bVal y .== sTrue) (Exp r))
---                               ]
---                           )
---                       ]
---                   )
---             )
---         ],
---       types = [boolCell]
---     }
-
--- connectedToTest :: PuzzleInstance
--- connectedToTest =
---   PuzzleInstance
---     { puzzleclass = connectedTo,
---       structure = replicate 4 . replicate 4 $ boolCell,
---       state =
---         let t = CellState {valueState = Just $ BoolEntry $ literal True, propertyStates = M.empty}
---             f = CellState {valueState = Just $ BoolEntry $ literal False, propertyStates = M.empty}
---             n = CellState {valueState = Nothing, propertyStates = M.empty}
---          in [ [t, n, f, f],
---               [f, n, n, f],
---               [f, f, n, n],
---               [f, f, f, t]
---             ]
---     }
-
--- connectedToTestSol :: PuzzleSolution
--- connectedToTestSol =
---   [ [1, 1, 0, 0],
---     [0, 1, 1, 0],
---     [0, 0, 1, 1],
---     [0, 0, 0, 1]
---   ]
-
--- boolCell :: CellType
--- boolCell =
---   CellType
---     { typeName = "Bool",
---       values = Bool,
---       propertySets = M.empty
---     }

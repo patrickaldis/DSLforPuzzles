@@ -20,7 +20,9 @@ applyExpr (Sum rule fExpr) b =
   let total = cellSum appliedRule
       appliedRule = applyCellRule rule b
    in applyExpr (fExpr total) b
-applyExpr (ConnectedBy x y cmap fExpr) b = applyExpr (fExpr sFalse) b
+applyExpr (ConnectedBy rule x y fExpr) b =
+  let (<~>) = isConnected (applyCellRule rule b)
+   in applyExpr (fExpr (x <~> y)) b
 
 -- | Takes a list of rules and enforce them on the supplied grid
 -- `cs cellTypes bList board`
