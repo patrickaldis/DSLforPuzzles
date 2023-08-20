@@ -18,12 +18,12 @@ library
     build-depends:    base,
                       sbv,
                       containers,
-                      array,
-                      placeholders,
-                      transformers
+                      transformers,
+                      megaparsec
 
     default-language: Haskell2010
     exposed-modules:  PuzzleDSL.DSL,
+                      PuzzleDSL.Text.Parser
     other-modules:    PuzzleDSL.Internal.Spec,
                       PuzzleDSL.Internal.Features.Sum,
                       PuzzleDSL.Internal.Features.Count,
@@ -38,6 +38,7 @@ executable PuzzleDSL
     build-depends:    base,
                       sbv,
                       transformers,
+                      megaparsec,
                       PuzzleDSL
 
     extra-libraries:  z3
