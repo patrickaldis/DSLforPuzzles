@@ -1,0 +1,14 @@
+---
+name: Norinori
+cells:
+  Cell:
+    Value: Bool
+    Properties:
+      Region: Int
+---
+
+For x Cell:
+  2 == Count (For y Cell: region y == region x && y)
+  If x Then:
+    1 == Count (For y Cell: y neighbor x && y)
+
