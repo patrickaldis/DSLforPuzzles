@@ -129,7 +129,7 @@ emptyBoard ts = mapM2d (uncurry initialiseVar) (zip2d ts indices)
           v <- free varName :: Symbolic SWord8
           constrain $ v .>= 1 .&& v .<= literal n
           return . cell $ NumericEntry v
-        Bool -> do
+        Boolean -> do
           b <- free varName :: Symbolic SBool
           return . cell $ BoolEntry b
 

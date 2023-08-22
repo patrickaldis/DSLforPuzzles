@@ -91,34 +91,34 @@ zipMapM2d f s = mapM2d (uncurry f) . zip2d s
 
 castToBool :: CellEntry -> SBool
 castToBool (BoolEntry b) = b
-castToBool c = error $ errorMsg c Bool
+castToBool c = error $ errorMsg c Boolean
 
 castToNum :: CellEntry -> SWord8
 castToNum (NumericEntry n) = n
-castToNum c = error $ errorMsg c Bool
+castToNum c = error $ errorMsg c Boolean
 
 castPropToBool :: CellProperty -> Bool
 castPropToBool (BoolProp b) = b
-castPropToBool c = error $ errorMsg c Bool
+castPropToBool c = error $ errorMsg c Boolean
 
 castPropToNum :: CellProperty -> Word8
 castPropToNum (NumericProp n) = n
-castPropToNum c = error $ errorMsg c Bool
+castPropToNum c = error $ errorMsg c Boolean
 
 class HasCellType a where
   printType :: a -> String
 
 instance HasCellType CellEntrySet where
   printType (Numeric _) = "Numeric"
-  printType Bool = "Bool"
+  printType Boolean = "Boolean"
 
 instance HasCellType CellEntry where
   printType (NumericEntry _) = "Numeric"
-  printType (BoolEntry _) = "Bool"
+  printType (BoolEntry _) = "Boolean"
 
 instance HasCellType CellProperty where
   printType (NumericProp _) = "Numeric"
-  printType (BoolProp _) = "Bool"
+  printType (BoolProp _) = "Boolean"
 
 instance HasCellType CellVar where
   printType = printType . value
