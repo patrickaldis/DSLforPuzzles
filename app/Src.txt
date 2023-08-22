@@ -2,8 +2,8 @@
 name: Norinori
 cells:
   Cell:
-    Value: Bool
-    Properties:
+    value: Bool
+    properties:
       Region: Int
 ---
 
