@@ -4,7 +4,7 @@ import Data.Maybe (fromJust)
 import Data.SBV hiding (name)
 import qualified Data.SBV.List as L
 import Data.SBV.Tuple
-import PuzzleDSL.Internal.Component
+import PuzzleDSL.Internal.Features.Component
 import Test.Hspec
 import Prelude hiding (lookup)
 
