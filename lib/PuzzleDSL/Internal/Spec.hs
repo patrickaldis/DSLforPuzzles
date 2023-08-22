@@ -71,6 +71,7 @@ data CellType = CellType
     values :: CellEntrySet,
     propertySets :: Map String CellPropertySet
   }
+  deriving (Show)
 
 emptyType :: CellType
 emptyType =
@@ -82,7 +83,8 @@ emptyType =
 
 data CellEntrySet
   = Numeric Word8
-  | Bool
+  | Boolean
+  deriving (Show)
 
 -- \| FSet [String]
 

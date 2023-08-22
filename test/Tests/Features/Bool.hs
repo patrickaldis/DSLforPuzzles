@@ -15,7 +15,7 @@ boolCell :: CellType
 boolCell =
   CellType
     { typeName = "Bool",
-      values = Bool,
+      values = Boolean,
       propertySets = empty
     }
 
