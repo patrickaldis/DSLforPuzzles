@@ -2,23 +2,28 @@
 -- Module: Spec
 -- Specifies all the datatypes used in the DSL
 module PuzzleDSL.Internal.Spec
-  ( CellType (..),
-    CellEntry (..),
-    CellProperty (..),
-    CellEntrySet (..),
-    CellPropertySet,
-    CellVar (..),
-    Index,
-    SBoard,
-    Expression (..),
+  ( -- DSL Expressions Objects
     Rule (..),
+    Expression (..),
+    Expressable (..),
+    CellRule,
+    CellTypeRule (..),
     ComponentMap,
-    BinarizeRule (..),
+    -- Variables
+    CellVar (..),
+    -- Puzzle Boilerplate
     PuzzleClass (..),
     PuzzleInstance (..),
     PuzzleStructure,
     PuzzleState,
     CellState (..),
+    CellType (..),
+    CellEntry (..),
+    CellEntrySet (..),
+    CellProperty (..),
+    CellPropertySet,
+    Index,
+    SBoard,
     emptyType,
   )
 where
@@ -31,23 +36,30 @@ data Rule
   = -- | `ForAll` constructor iterates over all cells of a given type
     ForAll CellType (CellVar -> [Rule])
   | -- | `Constrain` enforces constraints on the variables in scope
-    Constrain Expression
-  | -- | `CountComponents` computes the components of the grid according
-    -- to the binarize rule. It then passes the `ComponentMap` to the
-    -- Second argument of the constructor, where it can be used in the
-    -- `ConnectedBy` expression
-    CountComponents [BinarizeRule] (ComponentMap -> Rule)
+    Constrain (Expression Bool)
 
 -- | Datatype for expressing term-level expresions. In an
 -- `Expression`, all variables are in scope
-data Expression
-  = Exp SBool
-  | If Expression Expression
-  | Count CellType Rule (SWord8 -> Expression)
-  | ConnectedBy CellVar CellVar ComponentMap (SBool -> Expression)
+data Expression a
+  = Exp (SBV a)
+  | If (Expression Bool) (Expression a)
+  | Count (CellRule Bool) (SWord8 -> Expression a)
+  | Sum (CellRule Word8) (SWord8 -> Expression a)
+  | ConnectedBy (CellRule Bool) CellVar CellVar (SBool -> Expression a)
 
-data BinarizeRule
-  = For CellType (CellVar -> Expression)
+class SymVal a => Expressable a where
+  identity :: (SBV a)
+
+instance Expressable Bool where
+  identity = sTrue
+
+instance Expressable Word8 where
+  identity = literal 0
+
+type CellRule a = [CellTypeRule a]
+
+data CellTypeRule a
+  = For CellType (CellVar -> Expression a)
 
 -- | A description of the layout and rules of a puzzle.
 -- Comprises of `structure` and `constraints`

@@ -1,4 +1,4 @@
-module PuzzleDSL.Internal.Component (compRelation, dfs, dfs', neighbors, slookup, sFst, Label) where
+module PuzzleDSL.Internal.Features.Component (compRelation, dfs, dfs', neighbors, slookup, sFst, Label) where
 
 import Data.List ()
 import Data.SBV

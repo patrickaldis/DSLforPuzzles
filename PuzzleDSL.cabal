@@ -25,7 +25,8 @@ library
     default-language: Haskell2010
     exposed-modules:  PuzzleDSL.DSL,
     other-modules:    PuzzleDSL.Internal.Spec,
-                      PuzzleDSL.Internal.Component,
+                      PuzzleDSL.Internal.Features.Sum,
+                      PuzzleDSL.Internal.Features.Component,
                       PuzzleDSL.Internal.Utils,
                       PuzzleDSL.Internal.Rule,
                       PuzzleDSL.Internal.Solve
@@ -54,12 +55,14 @@ test-suite testing
                       PuzzleDSL
     default-language: Haskell2010
     hs-source-dirs:   test, lib
-    other-modules:    Tests.Puzzles.Sudoku,
-                      Tests.Features.Connectivity,
-                      Tests.Features.Bool,
+    other-modules:    Tests.Utils,
                       Tests.Features.Spec,
+                      Tests.Features.Bool,
                       Tests.Features.Property,
-                      Tests.Utils,
-                      PuzzleDSL.Internal.Component
+                      Tests.Features.Sum,
+                      Tests.Features.Connectivity,
+                      PuzzleDSL.Internal.Features.Component,
+                      Tests.Puzzles.Sudoku
+                      
 
 
