@@ -14,7 +14,6 @@ puzzleParser :: Parser String
 puzzleParser = do
   space
   _ <- string "---"
-  nlIndent 0
   jsonBlock <- parseJsonBlock
   _ <- string "---"
   ruleBlock <- takeRest
@@ -22,6 +21,7 @@ puzzleParser = do
 
 parseJsonBlock :: Parser (String, [CellType])
 parseJsonBlock = do
+  nlIndent 0
   _ <- string "name:"
   hspace
   puzName <- word
@@ -29,6 +29,7 @@ parseJsonBlock = do
   nlIndent 0
   _ <- string "cells:"
   hspace
+
   cs <- many parseCell
 
   nlIndent 0
@@ -47,7 +48,7 @@ parseCell = do
 
   nlIndent 2
   _ <- string "properties:"
-  ps <- many parseProperties
+  ps <- many parseProperty
   let props = fromList ps
   pure
     ( CellType
@@ -57,8 +58,8 @@ parseCell = do
         }
     )
 
-parseProperties :: Parser (String, CellPropertySet)
-parseProperties = do
+parseProperty :: Parser (String, CellPropertySet)
+parseProperty = do
   nlIndent 3
   propName <- word
   _ <- char ':'
