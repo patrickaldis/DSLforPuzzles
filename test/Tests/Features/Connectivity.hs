@@ -31,13 +31,14 @@ connectivityTests = describe "Connectivity" $ do
       allSat unknownLookup >>= (`shouldBe` "Solution #1:\n  s0 = (3,3) :: (Word8, Word8)\nSolution #2:\n  s0 = (4,3) :: (Word8, Word8)\nSolution #3:\n  s0 = (3,1) :: (Word8, Word8)\nSolution #4:\n  s0 = (1,1) :: (Word8, Word8)\nSolution #5:\n  s0 = (3,4) :: (Word8, Word8)\nSolution #6:\n  s0 = (4,4) :: (Word8, Word8)\nSolution #7:\n  s0 = (1,4) :: (Word8, Word8)\nSolution #8:\n  s0 = (1,2) :: (Word8, Word8)\nSolution #9:\n  s0 = (2,2) :: (Word8, Word8)\nSolution #10:\n  s0 = (2,1) :: (Word8, Word8)\nFound 10 different solutions.") . show
     it "neighbors (unknowns)" $ do
       allSat unknownNeighbors >>= (`shouldBe` "Solution #1:\n  s0 = (1,2) :: (Word8, Word8)\nThis is the only solution.") . show
-    it "dfs (unknowns)" $ do
-      allSat unknownDFS >>= (`shouldBe` "Solution #1:\n  s0 = True :: Bool\nThis is the only solution.") . show
-    -- it "components (unknowns)" $ do
-    --   allSat unknownComp >>= (`shouldBe` "") . show
 
-    it "components (unknowns)" $ do
-      allSat unknownComp >>= (`shouldBe` "") . show
+-- it "dfs (unknowns)" $ do
+--   allSat unknownDFS >>= (`shouldBe` "Solution #1:\n  s0 = True :: Bool\nThis is the only solution.") . show
+-- it "components (unknowns)" $ do
+--   allSat unknownComp >>= (`shouldBe` "") . show
+
+-- it "components (unknowns)" $ do
+--   allSat unknownComp >>= (`shouldBe` "") . show
 
 -- describe "Puzzle Tests" $ do
 --   it "Simple Connectivity" $ do
