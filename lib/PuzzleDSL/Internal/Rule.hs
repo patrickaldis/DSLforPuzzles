@@ -6,6 +6,7 @@ module PuzzleDSL.Internal.Rule (applyRules) where
 import Control.Monad (forM)
 import Data.SBV
 import PuzzleDSL.Internal.Features.Component
+import PuzzleDSL.Internal.Features.Count
 import PuzzleDSL.Internal.Features.Sum
 import PuzzleDSL.Internal.Spec
 import PuzzleDSL.Internal.Utils
@@ -14,7 +15,7 @@ import PuzzleDSL.Internal.Utils
 applyExpr :: Expressable a => Expression a -> SBoard -> SBV a
 applyExpr (Exp expr) _ = expr
 applyExpr (If cond expr) b = ite (applyExpr cond b) (applyExpr expr b) identity
-applyExpr (Count rule fExpr) b = applyExpr (fExpr 0) b
+applyExpr (Count rule fExpr) b = applyExpr (Sum (toSumRule rule) fExpr) b
 applyExpr (Sum rule fExpr) b =
   let total = cellSum appliedRule
       appliedRule = applyCellRule rule b
