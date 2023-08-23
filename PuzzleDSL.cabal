@@ -26,6 +26,7 @@ library
                       PuzzleDSL.Text.Parser
     other-modules:    PuzzleDSL.Internal.Spec,
                       PuzzleDSL.Internal.Features.Sum,
+                      PuzzleDSL.Internal.Features.Count,
                       PuzzleDSL.Internal.Features.Component,
                       PuzzleDSL.Internal.Utils,
                       PuzzleDSL.Internal.Rule,
