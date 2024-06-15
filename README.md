@@ -16,6 +16,10 @@ The project is packaged using IOHK's `haskell.nix` infrastructure, and uses both
 
 The goal of the project is to provide a way to declaratively describe the rules of a puzzle using something close to predicate logic.
 
+## Current State of the Project (June 2024)
+- [ ] Restructure the language as a *Deep Embedding* rather than a *Shallow Embedding*. This will allow for much easier parsing when reading from a textual format, and greater control over the language. For further reference on shallow vs deep embedding see [here](https://alessandrovermeulen.me/2013/07/13/the-difference-between-shallow-and-deep-embedding/)
+- [ ] Implementing expressing of connectivity between two cells. In my initial report, I identified that this would greatly increase expressiveness (and allow a lot of 'standard' puzzles to be described).
+
 # Building
 Currently, building the project runs the test suite. This contains unit tests for checking that the language behaves as desired, and other tests to check that specific puzzles can be solved.
 
